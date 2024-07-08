@@ -71,6 +71,9 @@ def _align_seg(
         else:
             return mismatch_pen
 
+    # print(gt, noise, sep="\n"*2)
+    # 1/0
+
     # NOTE: Work-around to enable support full Unicode character set - passing string as a list of characters
     alignments = pairwise2.align.globalcs(
         list(gt),
@@ -141,6 +144,8 @@ def _select_alignment_candidates(alignments, target_num_gt_tokens):
             # Returns the FIRST candidate that satisfies the invariant
             return alignment
 
+    # If no alignment candidates with the target number of tokens
+    # return alignments[0]
     raise ValueError(
         f"No alignment candidates with {target_num_gt_tokens} tokens. Total candidates: {len(alignments)}"
     )

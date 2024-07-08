@@ -132,6 +132,7 @@ def get_anchor_map(gt_tokens, ocr_tokens, min_anchor_len=2):
     lcs_str = lcs.get_str()
 
     # 4. Break up the LCS string into tokens
+    # lcs_words = set(preprocess.tokenize_and_remember_spacing(lcs_str)[0])
     lcs_words = set(preprocess.tokenize(lcs_str))
 
     # 5. Anchor words are the unique words in the lcs string
@@ -270,6 +271,8 @@ def align_w_anchor(gt, ocr, gap_char=GAP_CHAR, max_seg_length=MAX_ALIGN_SEGMENT_
         a tuple (str, str) of aligned ground truth and noise:
             (aligned_gt, aligned_noise)
     """
+    # gt_tokens, gt_spaces = preprocess.tokenize_and_remember_spacing(gt)
+    # ocr_tokens, ocr_spaces = preprocess.tokenize_and_remember_spacing(ocr)
     gt_tokens = preprocess.tokenize(gt)
     ocr_tokens = preprocess.tokenize(ocr)
 
@@ -292,7 +295,9 @@ def align_w_anchor(gt, ocr, gap_char=GAP_CHAR, max_seg_length=MAX_ALIGN_SEGMENT_
     aligned_segments_gt = []
     aligned_segments_ocr = []
     for gt_segment, noisy_segment in zip(gt_segments, ocr_segments):
+        # gt_segment = preprocess.join_tokens_with_spacing(gt_segment, gt_spaces)
         gt_segment = preprocess.join_tokens(gt_segment)
+        # noisy_segment = preprocess.join_tokens_with_spacing(noisy_segment, ocr_spaces)
         noisy_segment = preprocess.join_tokens(noisy_segment)
         # Run alignment algorithm
         aligned_seg_gt, aligned_seg_ocr = alignment.align(
