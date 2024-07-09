@@ -8,6 +8,7 @@ from io import StringIO
 
 END_OF_TOKEN = {" ", "\t", "\n"}
 NON_ASCII_REPLACEMENT = "_"
+lb = re.compile(r"\n")
 spaces = re.compile(r"\s")
 
 
@@ -41,37 +42,21 @@ def tokenize(s):
     # split alignment tokens by spaces, tabs and newline (and excluding them in the tokens)
     return s.split()
 
-def tokenize_and_remember_spacing(s):
-    """Tokenize string and remember the spacing
+
+def tokenize_and_remember_linebreaks(s):
+    """Tokenize string and remember the linebreaks
 
     Arguments:
         s (str) : aligned string
 
     Returns:
-        a list of tokens and a the list of the trimmed spacing
+        a list of tokens and the list of the indexes (in the tokens) where linebreaks are
     """
-    # tokens = []
-    # spacing = []
-    # token = StringIO()
-    # for c in s:
-    #     if _is_spacing(c):
-    #         if token:
-    #             tokens.append(token.getvalue())
-    #             token = StringIO()
-    #         spacing.append(c)
-    #     else:
-    #         token.write(c)
-    # if token:
-    #     tokens.append(token.getvalue())
-    # return tokens, spacing
-    spaces_ = spaces.findall(s)
-    tokens = spaces.split(s)
-    if len(tokens) != len(spaces_):
-        if len(tokens) == len(spaces_) + 1:
-            spaces_.append("")
-        else:
-            raise ValueError("Number of tokens and spaces do not match")
-    return tokens, spaces_
+    # split alignment tokens by spaces, tabs and newline (and excluding them in the tokens)
+    tokens = s.split()
+    all_spaces = spaces.findall(s)
+    linebreaks = [i for i, c in enumerate(all_spaces) if c == "\n"]
+    return tokens, linebreaks
 
 
 def join_tokens(tokens):
@@ -85,17 +70,20 @@ def join_tokens(tokens):
     """
     return " ".join(tokens)
 
+
 def join_tokens_with_spacing(tokens, spacing):
-    """Join a list of tokens with spacing into a string
+    """Join a list of tokens inserting linebreaks at the specified indexes
+    Intended to be used with the output of ``tokenize_and_remember_linebreaks``
 
     Arguments:
         tokens (list) : a list of tokens
-        spacing (list) : a list of spacing
+        spacing (list) : a list of indexes where a linebreak should be inserted
 
     Returns:
-        a string with tokens and spacing
+        a string with space-separated tokens and re inserted linebreaks
     """
-    return "".join([f"{token}{space}" for token, space in zip(tokens, spacing)])
+    # join tokens with spaces
+    return "".join(t + "\n" if i in spacing else t + " " for i, t in enumerate(tokens))[:-1]
 
 
 def _is_spacing(c):
