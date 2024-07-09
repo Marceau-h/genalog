@@ -8,7 +8,6 @@ from io import StringIO
 
 END_OF_TOKEN = {" ", "\t", "\n"}
 NON_ASCII_REPLACEMENT = "_"
-lb = re.compile(r"\n")
 spaces = re.compile(r"\s")
 
 
