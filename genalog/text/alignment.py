@@ -151,7 +151,7 @@ def _select_alignment_candidates(alignments, target_num_gt_tokens):
     )
 
 
-def align(gt, noise, gap_char=GAP_CHAR):
+def align(gt, noise, gap_char=GAP_CHAR, second_time=False):
     """Align two text segments via sequence alignment algorithm
 
     **NOTE**: this algorithm is O(N^2) and is NOT efficient for longer text.
@@ -192,9 +192,16 @@ def align(gt, noise, gap_char=GAP_CHAR):
                 alignments, num_gt_tokens
             )
         except ValueError as e:
-            raise ValueError(
-                f"Error with input strings '{gt}' and '{noise}': \n{str(e)}"
-            )
+            if second_time:
+                raise ValueError(
+                    f"Error with input strings '{gt}' and '{noise}': \n{str(e)}"
+                )
+            # Retry with removing the line breaks
+            print(f"Error with input strings '{gt}' and '{noise}': \n{str(e)}, retrying once ...")
+            gt = gt.replace("\n", " ")
+            noise = noise.replace("\n", " ")
+            return align(gt, noise, gap_char=gap_char, second_time=True)
+
         return aligned_gt, aligned_noise
 
 
