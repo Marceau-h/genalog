@@ -8,8 +8,7 @@ from io import StringIO
 
 END_OF_TOKEN = {" ", "\t", "\n"}
 NON_ASCII_REPLACEMENT = "_"
-spaces = re.compile(r"\s")
-
+spaces = re.compile(r"((\s)+)")
 
 def remove_non_ascii(token, replacement=NON_ASCII_REPLACEMENT):
     """Remove non ascii characters in a token
@@ -49,12 +48,19 @@ def tokenize_and_remember_linebreaks(s):
         s (str) : aligned string
 
     Returns:
-        a list of tokens and the list of the indexes (in the tokens) where linebreaks are
+        a list of tokens and the dict of the indexes (in the tokens) where linebreaks are present
+        with the number of linebreaks in the line as the value
     """
     # split alignment tokens by spaces, tabs and newline (and excluding them in the tokens)
     tokens = s.split()
-    all_spaces = spaces.findall(s)
-    linebreaks = [i for i, c in enumerate(all_spaces) if c == "\n"]
+    all_spaces = [space[0] for space in spaces.findall(s)]
+    # linebreaks = [i for i, c in enumerate(all_spaces) if all(c == "\n" for c in c)]
+    linebreaks = {
+        i: sum(e == "\n" for e in c) for i, c in enumerate(all_spaces)
+    }
+    linebreaks = {
+        k: v for k, v in linebreaks.items() if v > 0
+    }
     return tokens, linebreaks
 
 
@@ -70,19 +76,28 @@ def join_tokens(tokens):
     return " ".join(tokens)
 
 
-def join_tokens_with_spacing(tokens, spacing):
+def join_tokens_with_spacing(tokens, linebreaks):
     """Join a list of tokens inserting linebreaks at the specified indexes
     Intended to be used with the output of ``tokenize_and_remember_linebreaks``
 
     Arguments:
         tokens (list) : a list of tokens
-        spacing (list) : a list of indexes where a linebreak should be inserted
+        linebreaks (dict) : a dict of the indexes (in the tokens) where linebreaks are present
+                            with the number of linebreaks in the line as the value
 
     Returns:
         a string with space-separated tokens and re inserted linebreaks
     """
     # join tokens with spaces
-    return "".join(t + "\n" if i in spacing else t + " " for i, t in enumerate(tokens))[:-1]
+    # return "".join(t + "\n" if i in spacing else t + " " for i, t in enumerate(tokens))[:-1]
+    s = StringIO()
+    for i, t in enumerate(tokens):
+        s.write(t)
+        if i in linebreaks:
+            s.write("\n" * linebreaks[i])
+        else:
+            s.write(" ")
+    return s.getvalue().strip()
 
 
 def _is_spacing(c):

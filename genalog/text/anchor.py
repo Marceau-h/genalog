@@ -288,16 +288,30 @@ def align_w_anchor(gt, ocr, gap_char=GAP_CHAR, max_seg_length=MAX_ALIGN_SEGMENT_
 
     gt_segments = [gt_tokens[start:end] for start, end in start_n_end_gt]
     ocr_segments = [ocr_tokens[start:end] for start, end in start_n_end_ocr]
+    # gt_lbs_by_segment = [
+    #     [lb - start for lb in gt_lbs if start <= lb < end]
+    #     if end is not None
+    #     else [lb - start for lb in gt_lbs if start <= lb]
+    #     for start, end in start_n_end_gt
+    # ]
+    # ocr_lbs_by_segment = [
+    #     [lb - start for lb in ocr_lbs if start <= lb < end]
+    #     if end is not None
+    #     else [lb - start for lb in ocr_lbs if start <= lb]
+    #     for start, end in start_n_end_ocr
+    # ]
+
     gt_lbs_by_segment = [
-        [lb - start for lb in gt_lbs if start <= lb < end]
+        {lb - start : lb_v for lb, lb_v in gt_lbs.items() if start <= lb < end}
         if end is not None
-        else [lb - start for lb in gt_lbs if start <= lb]
+        else {lb - start : lb_v for lb, lb_v in gt_lbs.items() if start <= lb}
         for start, end in start_n_end_gt
     ]
+
     ocr_lbs_by_segment = [
-        [lb - start for lb in ocr_lbs if start <= lb < end]
+        {lb - start : lb_v for lb, lb_v in ocr_lbs.items() if start <= lb < end}
         if end is not None
-        else [lb - start for lb in ocr_lbs if start <= lb]
+        else {lb - start : lb_v for lb, lb_v in ocr_lbs.items() if start <= lb}
         for start, end in start_n_end_ocr
     ]
 
