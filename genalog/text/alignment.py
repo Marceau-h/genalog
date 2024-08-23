@@ -16,7 +16,7 @@ GAP_EXT_PENALTY = -0.5
 MISMATCH_PENALTY = -0.5
 GAP_CHAR = "@"
 ONE_ALIGNMENT_ONLY = False
-SPACE_MISMATCH_PENALTY = 0.1
+SPACE_MISMATCH_PENALTY = 0.2
 
 
 def _join_char_list(alignment_tuple):
@@ -65,7 +65,7 @@ def _align_seg(
     def match_reward_fn(x, y):
         if x == y:
             return match_reward
-        elif x == " " or y == " ":
+        elif x == " " or y == " " or x =="\n" or y == "\n":
             # mismatch of a character with a space get a stronger penalty
             return mismatch_pen - space_mismatch_penalty
         else:
